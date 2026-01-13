@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban – simpleshow Style Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .simpleshow-bg {
+            background-image: radial-gradient(#e5e7eb 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+        }
+
+        .kanban-column {
+            min-height: 400px;
+            transition: all 0.3s ease;
+            border: 2px solid #000;
+        }
+
+        .card-sketch {
+            border: 3px solid #000;
+            background: white;
+            box-shadow: 6px 6px 0px #000;
+            transition: transform 0.1s ease;
+            position: relative;
+        }
+
+        .card-sketch::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 10px;
+            background: rgba(0,0,0,0.1);
+            border: 1px solid #000;
+            border-radius: 2px;
+        }
+
+        .card-sketch:active {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .wip-limit-exceeded {
+            background-color: #fee2e2;
+            border: 4px dashed #000;
+            position: relative;
+        }
+
+        .wip-limit-exceeded::after {
+            content: 'BOTTLENECK DETECTED!';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            background: #000;
+            color: #fff;
+            padding: 5px 10px;
+            font-weight: bold;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .sketch-border {
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-pop { animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    </style>
+</head>
+<body class="simpleshow-bg">
+
+    <!-- Hero Section -->
+    <header class="py-16 px-6 text-center border-b-4 border-black bg-white">
+        <h1 class="text-5xl md:text-7xl font-black mb-2 uppercase tracking-tighter">Kanban Guide</h1>
+        <p class="text-2xl font-bold italic text-gray-600">Based on the simpleshow agile method</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto py-12 px-4">
+        
+        <!-- The Storyline from the Video -->
+        <section class="grid md:grid-cols-2 gap-16 mb-24 items-start">
+            <div class="space-y-8">
+                <div class="sketch-border p-8 bg-white">
+                    <h2 class="text-3xl font-black mb-4 uppercase">Meet Lisa & Max</h2>
+                    <p class="text-xl leading-relaxed">
+                        <strong>Lisa</strong> is a project manager in IT handling too many projects at once. Her friend <strong>Max</strong> recommends <strong>Kanban</strong>—a tried and tested method to optimize production and teamwork.
+                    </p>
+                </div>
+
+                <div class="sketch-border p-8 bg-blue-100">
+                    <h2 class="text-3xl font-black mb-4 uppercase">The Process</h2>
+                    <p class="text-xl leading-relaxed">
+                        Max shows Lisa how to divide big projects into <strong>small subtasks</strong> and attach them to a board. No task is allowed to skip a step, ensuring everything stays lean and organized.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="sticky top-10 space-y-6">
+                <div class="sketch-border p-6 bg-white rotate-1">
+                    <h3 class="text-2xl font-black mb-4 underline">Video Highlights:</h3>
+                    <ul class="space-y-4 font-bold text-lg">
+                        <li class="flex items-start gap-4">
+                            <span>✅</span>
+                            <span><strong>Visualize:</strong> Map the value chain from left to right.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span>✅</span>
+                            <span><strong>Restrict:</strong> Limit active tasks per step to prevent bottlenecks.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span>✅</span>
+                            <span><strong>Self-Organize:</strong> Hold regular meetings to discuss progress.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span>✅</span>
+                            <span><strong>Improve:</strong> Create a culture of continuous rectification.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Board -->
+        <section class="mb-24">
+            <div class="mb-12">
+                <h2 class="text-4xl font-black uppercase text-center mb-2">Lisa's IT Board</h2>
+                <p class="text-center text-gray-600 font-medium italic">"Control WHAT, HOW MUCH, and WHEN things are produced."</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Upcoming Projects -->
+                <div class="flex flex-col">
+                    <div class="bg-black text-white p-3 font-black text-xl flex justify-between items-center">
+                        <span>SUBTASKS</span>
+                        <span id="backlog-count" class="bg-white text-black px-2 py-0.5 text-sm">0</span>
+                    </div>
+                    <div id="backlog" class="kanban-column p-4 bg-gray-50 space-y-6" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    </div>
+                    <button onclick="addTask()" class="mt-4 bg-white border-4 border-black p-4 font-black hover:bg-gray-100 transition-all uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">
+                        Break Down Project 🔨
+                    </button>
+                </div>
+
+                <!-- Active Work -->
+                <div class="flex flex-col">
+                    <div class="bg-black text-white p-3 font-black text-xl flex justify-between items-center">
+                        <span>ACTIVE (Limit: 2)</span>
+                        <span id="doing-count" class="bg-white text-black px-2 py-0.5 text-sm">0</span>
+                    </div>
+                    <div id="doing" class="kanban-column p-4 bg-gray-50 space-y-6" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    </div>
+                </div>
+
+                <!-- Finished -->
+                <div class="flex flex-col">
+                    <div class="bg-black text-white p-3 font-black text-xl flex justify-between items-center">
+                        <span>COMPLETED</span>
+                        <span id="done-count" class="bg-white text-black px-2 py-0.5 text-sm">0</span>
+                    </div>
+                    <div id="done" class="kanban-column p-4 bg-green-50 space-y-6" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Culture Section -->
+        <section class="sketch-border p-12 bg-yellow-300 text-center mb-12">
+            <h2 class="text-4xl font-black mb-6 uppercase">The Culture of Improvement</h2>
+            <p class="text-xl max-w-3xl mx-auto mb-8 font-medium">
+                As the video explains, the team must be <strong>self-organized</strong>. They evaluate progress and propose their own improvements to identify and rectify problems immediately.
+            </p>
+            <div class="inline-block bg-black text-white px-8 py-4 font-bold text-2xl uppercase">
+                Continuous Improvement
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottleneck Warning -->
+    <div id="wip-warning" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-10 py-5 rounded-none shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-black text-xl z-50 border-4 border-black animate-bounce text-center">
+        ⚠️ LEAN PRINCIPLE ALERT! <br> 
+        <span class="text-sm font-normal">Max says: "Complete existing cards before starting new ones!"</span>
+    </div>
+
+    <script>
+        let taskCounter = 0;
+        const WIP_LIMIT = 2;
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            let target = ev.target;
+
+            while (target && !target.classList.contains('kanban-column')) {
+                target = target.parentElement;
+            }
+
+            if (target) {
+                target.appendChild(draggedElement);
+                updateCounts();
+                checkWip();
+            }
+        }
+
+        function addTask() {
+            taskCounter++;
+            const id = 'task-' + taskCounter;
+            const tasks = [
+                "Coding Feature", "Server Setup", "Bug Fixing", 
+                "UX Research", "API Docs", "Security Audit"
+            ];
+            const title = tasks[(taskCounter - 1) % tasks.length];
+            
+            const card = document.createElement('div');
+            card.id = id;
+            card.className = "card-sketch p-5 cursor-grab bg-white select-none animate-pop";
+            card.draggable = true;
+            card.ondragstart = drag;
+            
+            card.innerHTML = `
+                <div class="text-xs font-black uppercase text-gray-400 mb-1">Subtask #${taskCounter}</div>
+                <div class="text-xl font-bold italic">${title}</div>
+                <div class="mt-4 flex justify-between items-center">
+                    <span class="text-[10px] bg-black text-white px-1">IT DEPT</span>
+                    <span class="text-lg">⚙️</span>
+                </div>
+            `;
+
+            document.getElementById('backlog').appendChild(card);
+            updateCounts();
+        }
+
+        function updateCounts() {
+            document.getElementById('backlog-count').innerText = document.getElementById('backlog').children.length;
+            document.getElementById('doing-count').innerText = document.getElementById('doing').children.length;
+            document.getElementById('done-count').innerText = document.getElementById('done').children.length;
+        }
+
+        function checkWip() {
+            const doingCol = document.getElementById('doing');
+            const count = doingCol.children.length;
+            const warning = document.getElementById('wip-warning');
+
+            if (count > WIP_LIMIT) {
+                doingCol.classList.add('wip-limit-exceeded');
+                warning.classList.remove('hidden');
+            } else {
+                doingCol.classList.remove('wip-limit-exceeded');
+                warning.classList.add('hidden');
+            }
+        }
+
+        window.onload = () => {
+            // Initial tasks for Lisa's board
+            setTimeout(addTask, 100);
+            setTimeout(addTask, 300);
+            setTimeout(addTask, 500);
+        };
+    </script>
+</body>
+</html>
